@@ -1,67 +1,82 @@
-# 🛡️ AlfaBrowserautomation — Security-Aware Content Gateway for Agents
+# AlfaBrowserautomation
 
-**AlfaBrowserautomation** to lokalna, bezpieczna brama zawartości (security gateway) dla autonomicznych agentów przeglądarkowych. W odróżnieniu od klasycznych systemów opartych na analizie wizualnej (vision) lub przesyłaniu pełnych zrzutów ekranu do zewnętrznych modeli chmurowych, AlfaBrowserautomation działa w 100% lokalnie, zabezpiecza dane użytkownika (ciasteczka, sesje, dane formularzy) i weryfikuje pobieraną treść przed jej przekazaniem do agenta.
+Security-aware content gateway for browser agents with local privacy, intent gating and MCP-ready integration.
 
----
+![AlfaBrowserautomation preview](https://github.com/user-attachments/assets/351d1d82-297c-4154-ad27-c4552219ed28)
 
-## 🧭 Jak to Działa?
+## What it is
 
-1. **Intake Intencji**: Agent deklaruje swój cel (`goal`), dane wyjściowe które chce pobrać (`allowed_outputs`) oraz niedozwolone przesunięcia celu (`forbidden_shifts`).
-2. **Fetch DOM**: Brama pobiera zawartość strony (statycznie lub renderując dynamiczny JS przez Playwright).
-3. **Analiza Bezpieczeństwa**:
-   - **Skaner Prompt Injection**: Szuka w tekście strony ukrytych instrukcji wrogiego przejęcia kontekstu (np. `"ignore previous instructions"`).
-   - **Skaner Sygnałów OWASP**: Wykrywa anomalie struktury DOM (np. offscreen content, niewidoczne formularze, iframy, podejrzane redirecty).
-   - **Klasyfikator DOM**: Taguje bloki tekstu jako `important`, `noise`, `prompt_like`, `suspicious` lub `discard`.
-4. **Intent Diff**: Porównuje intencję agenta z zawartością strony, aby wykryć, czy strona próbuje zmanipulować zachowanie agenta (Drift).
-5. **Policy Engine**: Podejmuje ostateczną decyzję decyzyjną:
-   - `ALLOW` — przekazuje czysty, bezpieczny DOM do agenta.
-   - `SANITIZE` — usuwa podejrzane i wrogie bloki tekstu, a bezpieczną resztę przekazuje agentowi.
-   - `HOLD` — wstrzymuje operację i przekazuje sprawę do weryfikacji operatorowi (Human-in-the-loop).
-   - `BLOCK` — całkowicie blokuje dostęp do witryny z powodu wysokiego ryzyka.
+**AlfaBrowserautomation** to lokalna, bezpieczna brama zawartości dla autonomicznych agentów przeglądarkowych. Zamiast wpuszczać model bezpośrednio na stronę, system:
 
----
+1. przyjmuje deklarowaną intencję agenta,
+2. pobiera i analizuje treść strony,
+3. skanuje prompt injection i techniczne sygnały ryzyka,
+4. porównuje intencję z tym, co strona próbuje wymusić,
+5. zwraca werdykt `ALLOW / SANITIZE / HOLD / BLOCK`.
 
-## 📂 Struktura Repozytorium
+To jest warstwa pośrednia między agentem a stroną.
+
+## Core flow
+
+1. **Intent Intake**
+   Agent deklaruje `goal`, `allowedOutputs`, `forbiddenShifts`.
+
+2. **Fetch DOM**
+   System pobiera HTML i wyciąga tekst oraz sygnały DOM.
+
+3. **Security Analysis**
+   - Prompt Injection Scanner
+   - OWASP / DOM Signal Scanner
+   - Intent Drift Detection
+   - Policy Engine
+
+4. **Decision**
+   - `ALLOW` – treść bezpieczna
+   - `SANITIZE` – treść oczyszczona
+   - `HOLD` – wymaga decyzji operatora
+   - `BLOCK` – zbyt duże ryzyko
+
+## Repository structure
 
 ```text
 AlfaBrowserautomation/
-  package.json             # Główny package.json (pnpm monorepo)
-  pnpm-workspace.yaml      # Definicja workspace dla aplikacji i pakietów
   apps/
-    api/                   # Express API (analiza i skanowanie)
-    web/                   # Panel Dashboard operatora (Next.js/React)
+    api/          Express API for scanning and verdicts
+    web/          Next.js operator dashboard
+    mcp-server/   MCP server scaffold over local API
   packages/
-    shared/                # Współdzielone typy i schematy Zod
+    shared/       Shared schemas and types
   data/
-    rules/                 # JSON z regułami i sygnaturami zagrożeń
+    rules/        Detection patterns and rules
+  docs/
+    mcp-server.md
 ```
 
----
-
-## 🛠️ Uruchomienie lokalne
+## Local run
 
 ```bash
-# Instalacja zależności
 pnpm install
 
-# Uruchomienie API (apps/api)
 pnpm --filter api dev
-
-# Uruchomienie Dashboardu (apps/web)
 pnpm --filter web dev
-
-# Uruchomienie MCP Server (apps/mcp-server)
 pnpm --filter mcp-server dev
 ```
 
----
+## MCP
 
-## MCP Server
+Repo zawiera scaffold dla `apps/mcp-server`, który wystawia lokalne API skanera jako narzędzia MCP.
 
-Repo zawiera scaffold dla `apps/mcp-server`, który ma wystawiać narzędzia MCP nad lokalnym API skanera. To jest warstwa pod:
+Plan v1:
+- `health`
+- `scan_url`
 
-- integracje z agentami przez MCP,
-- wywołania `scan_url` bez wpinania modeli bezpośrednio do frontendu,
-- późniejszą płatną warstwę orkiestracji i polityk.
+Opis kierunku:
+- [docs/mcp-server.md](./docs/mcp-server.md)
 
-Szczegóły planu są w [docs/mcp-server.md](./docs/mcp-server.md).
+## Goal
+
+Nie budować kolejnej “AI przeglądarki”, tylko:
+
+**security-aware content gateway for agents**
+
+czyli system, który chroni prywatność, filtruje treść, wykrywa drift i przygotowuje stronę zanim model podejmie akcję.
