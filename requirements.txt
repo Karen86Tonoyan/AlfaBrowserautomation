@@ -1,0 +1,6 @@
+# ALFA Agent Control System — Python dependencies
+# All runtime modules use only the Python standard library.
+# The packages below are needed for development and testing only.
+
+pytest>=8.0
+pytest-cov>=5.0
