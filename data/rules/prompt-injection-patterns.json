@@ -1,0 +1,34 @@
+{
+  "rules": [
+    {
+      "id": "inj_ignore_prev",
+      "name": "Ignore Previous Instructions",
+      "pattern": "(ignore|override|bypass|disregard)\\s+(previous|prior|all|system)?\\s*(instructions|prompts|directives|messages)",
+      "risk": "critical"
+    },
+    {
+      "id": "inj_sys_prompt",
+      "name": "System Prompt Revelation",
+      "pattern": "(reveal|show|output|print|display|tell me|explain)\\s+(your|the)?\\s*(system prompt|developer instructions|hidden configuration|initial instructions)",
+      "risk": "high"
+    },
+    {
+      "id": "inj_roleplay",
+      "name": "Unauthorized Roleplay/Persona Shift",
+      "pattern": "you\\s+must\\s+now\\s+act\\s+as|you\\s+are\\s+no\\s+longer|new\\s+persona|act\\s+like|simulate\\s+a",
+      "risk": "medium"
+    },
+    {
+      "id": "inj_data_exfil",
+      "name": "Data Exfiltration Attempt",
+      "pattern": "(send|exfiltrate|leak|post|upload|transmit)\\s+(secret|password|cookie|credential|token|key)",
+      "risk": "critical"
+    },
+    {
+      "id": "inj_change_task",
+      "name": "Task Redirection",
+      "pattern": "new\\s+task:|instead\\s+of\\s+doing|forget\\s+about\\s+the\\s+product|redirect\\s+your\\s+goal",
+      "risk": "high"
+    }
+  ]
+}

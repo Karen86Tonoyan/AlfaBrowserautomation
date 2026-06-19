@@ -1,0 +1,19 @@
+{
+  "name": "mcp-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}
